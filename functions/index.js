@@ -1,22 +1,26 @@
-const functions = require('firebase-functions');
-const express = require('express');
-const app = express();
+const functions = require("firebase-functions");
 
 var admin = require("firebase-admin");
 
 var serviceAccount = require("../authkey.json");
 
-
 admin.initializeApp({
-    credential: admin.credential.cert(serviceAccount),
-    databaseURL: "https://file-io-d8da0.firebaseio.com"
+  credential: admin.credential.cert(serviceAccount),
+  databaseURL: "https://file-io-d8da0.firebaseio.com"
 });
-// // Create and Deploy Your First Cloud Functions
-// // https://firebase.google.com/docs/functions/write-firebase-functions
-//
 
-app.get("/hello", (req, res) => {
-    res.send("Hello World");
+exports.Storage = functions.firestore.document("Storage_value")
+.onUpdate((change, context) => {
+    const { Storage } = require("@google-cloud/storage");
+    const storage = new Storage();
+    const bucket = storage.bucket("file-io-d8da0.appspot.com")
+    
+    const options = {
+        destination: "public/hello_world.jpeg"
+    };
+    
+    bucket.upload("hello_world.jpeg", options);
+
+    return 0;
 })
 
-exports.app = functions.https.onRequest(app);
